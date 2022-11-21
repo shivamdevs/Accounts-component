@@ -1,3 +1,6 @@
+html:has(> body .fixbox) {
+    background-color: #0b1127;
+}
 .fixbox {
     display: flex;
     justify-content: space-between;
@@ -8,8 +11,8 @@
     background-color: #0b1127;
     flex-direction: column;
     overflow: auto;
-    background-image: url(./../images/dehq31u.jpg);
     background-size: cover;
+    background-position: right center;
 }
 .fixbox,
 .fixbox * {
@@ -24,18 +27,20 @@
     width: 100%;
 }
 .footer {
-    justify-content: flex-end;
-    align-items: flex-end;
-    gap: 1vw;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    gap: .5vw;
+    width: 100%;
     color: #727888;
-    padding: 10px 20px 20px;
-    padding-right: 20vw;
+    font-weight: 500;
+    font-size: 13px;
+    margin-top: 20px;
 }
 .foot {
     display: inline-block;
     text-decoration: none;
     color: #727888;
-    font-size: 14px;
     transition: .2s ease;
 }
 .foot:hover {
@@ -46,10 +51,16 @@
     justify-content: space-around;
     align-items: center;
     width: 100%;
+    flex: 1;
     padding-inline: 10px;
 }
-.proxy {
+.container {
     display: flex;
+    flex: 1;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    padding-block: 5vh;
 }
 .authbox {
     display: flex;
@@ -106,12 +117,12 @@
 .button:hover {
     border-color: #92d4ffaa;
 }
-.input:focus {
+.button:not(:disabled):focus-visible,
+.input:not(:disabled):focus {
     border-color: #92d4ff;
     box-shadow: 0 0 0 1px #92d4ff;
 }
-.button:disabled,
-.button.disabled {
+.button:disabled {
     opacity: .7;
     cursor: not-allowed;
 }
@@ -124,6 +135,7 @@
     background-color: #165e79;
     cursor: pointer;
 }
+.action:not(:disabled):focus-visible,
 .action:not(:disabled):active {
     background-color: #184759;
 }
@@ -139,6 +151,7 @@
     background-color: #165e7933;
     cursor: pointer;
 }
+.coop:not(:disabled):focus-visible,
 .coop:not(:disabled):active {
     background-color: #18475922;
 }
@@ -192,16 +205,11 @@
     .proxy {
         display: none;
     }
-    .fixbox {
-        background-position: center;
-        background-image: url(./../images/hfdtyr4.jpg);
-    }
     .authbox {
         background-color: #0008;
     }
     .footer {
         justify-content: center;
-        gap: 20px;
-        padding-right: 20px;
+        gap: 10px;
     }
 }

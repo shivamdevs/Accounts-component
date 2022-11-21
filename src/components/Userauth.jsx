@@ -6,30 +6,31 @@ import css from './styles/userauth.module.css';
 import Google from './images/google_auth.svg';
 import { Link, Route, Routes } from 'react-router-dom';
 
-import { setTitle } from '../appdata';
+import { getCoverArt, setTitle } from '../appdata';
 
 function Userauth(props) {
     return (
-        <div className={css.fixbox}>
-            <div className={css.fixrow}></div>
+        <div className={css.fixbox} style={{backgroundImage: `url(/assets/images/coverarts/o-${getCoverArt()}.jpg)`}}>
             <div className={css.row}>
-                <div className={css.proxy}></div>
-                <div className={css.authbox}>
-                    <Routes>
-                        <Route path="/" element={<Login />} />
-                        <Route path="/register" element={<Register />} />
-                        <Route path="/recover" element={<Recover />} />
-                    </Routes>
+                <div className={classNames([css.container, css.proxy])}></div>
+                <div className={css.container}>
+                    <div className={css.authbox}>
+                        <Routes>
+                            <Route path="/" element={<Login />} />
+                            <Route path="/register" element={<Register />} />
+                            <Route path="/recover" element={<Recover />} />
+                        </Routes>
+                        <div className={css.footer}>
+                            <a href="https://github.com/shivamdevs" target="_blank" className={css.foot} rel="noreferrer">© Shivam Devs 2022</a>
+                            •
+                            <Link to="/policies" className={css.foot}>Privacy</Link>
+                            •
+                            <Link to="/policies/terms" className={css.foot}>Terms</Link>
+                            •
+                            <Link to="/policies/cookies" className={css.foot}>Cookies</Link>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <div className={classNames([css.fixrow, css.footer])}>
-                <Link to="https://github.com/shivamdevs" className={css.foot}>© Shivam Devs 2022</Link>
-                •
-                <Link to="/policies" className={css.foot}>Privacy</Link>
-                •
-                <Link to="/policies/terms" className={css.foot}>Terms</Link>
-                •
-                <Link to="/policies/cookies" className={css.foot}>Cookies</Link>
             </div>
         </div>
     );
