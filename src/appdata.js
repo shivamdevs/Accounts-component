@@ -1,4 +1,4 @@
-const AppName = "Tasks";
+const AppName = "Accounts";
 const setTitle = (...titles) => {
     document.title = (titles.length ? titles.join(' • ') + ' • ' : '') + AppName;
 };

@@ -1,6 +1,10 @@
-html:has(> body .fixbox) {
+html,
+:root {
     background-color: #0b1127;
+    color-scheme: dark;
+    color: #fff;
 }
+
 .fixbox {
     display: flex;
     justify-content: space-between;
@@ -14,11 +18,7 @@ html:has(> body .fixbox) {
     background-size: cover;
     background-position: right center;
 }
-.fixbox,
-.fixbox * {
-    color-scheme: dark;
-    color: #fff;
-}
+
 .fixrow {
     display: flex;
     flex-wrap: wrap;
@@ -26,6 +26,7 @@ html:has(> body .fixbox) {
     min-height: 10vh;
     width: 100%;
 }
+
 .footer {
     justify-content: center;
     align-items: center;
@@ -37,15 +38,18 @@ html:has(> body .fixbox) {
     font-size: 13px;
     margin-top: 20px;
 }
+
 .foot {
     display: inline-block;
     text-decoration: none;
     color: #727888;
     transition: .2s ease;
 }
+
 .foot:hover {
     color: #ccc;
 }
+
 .row {
     display: flex;
     justify-content: space-around;
@@ -54,6 +58,7 @@ html:has(> body .fixbox) {
     flex: 1;
     padding-inline: 10px;
 }
+
 .container {
     display: flex;
     flex: 1;
@@ -62,6 +67,7 @@ html:has(> body .fixbox) {
     flex-direction: column;
     padding-block: 5vh;
 }
+
 .authbox {
     display: flex;
     flex-direction: column;
@@ -75,17 +81,38 @@ html:has(> body .fixbox) {
     backdrop-filter: blur(16px);
     border-radius: 15px;
 }
+
 .login {
     display: block;
-    width: 100%;;
+    width: 100%;
+    ;
 }
+
 .title {
     font-size: 24px;
     font-weight: 600;
     margin-bottom: 1rem;
     text-align: center;
     color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
+
+.title>span {
+    margin-inline: auto;
+}
+
+.titleArrow {
+    text-decoration: none;
+    color: #ddd;
+    transition: .2s;
+}
+
+.titleArrow:hover {
+    color: #fff;
+}
+
 .group {
     display: flex;
     flex-direction: column;
@@ -94,6 +121,7 @@ html:has(> body .fixbox) {
     padding-block: 10px;
     margin-block: 10px;
 }
+
 .label {
     font-size: 16px;
     font-weight: 500;
@@ -103,6 +131,7 @@ html:has(> body .fixbox) {
     padding-bottom: 6px;
     padding-inline: 15px;
 }
+
 .input,
 .button {
     width: 100%;
@@ -113,48 +142,67 @@ html:has(> body .fixbox) {
     padding: 15px 20px;
     transition: .2s ease;
 }
+
 .input:hover,
 .button:hover {
     border-color: #92d4ffaa;
 }
+
 .button:not(:disabled):focus-visible,
 .input:not(:disabled):focus {
     border-color: #92d4ff;
     box-shadow: 0 0 0 1px #92d4ff;
 }
+
 .button:disabled {
     opacity: .7;
     cursor: not-allowed;
 }
+
+.button>img {
+    max-width: 24px;
+    max-height: 24px;
+}
+
 .action {
     background-color: #1d586e;
     border-color: #92d4ff55 !important;
     color: #fff;
 }
+
 .action:not(:disabled):hover {
     background-color: #165e79;
     cursor: pointer;
 }
+
 .action:not(:disabled):focus-visible,
 .action:not(:disabled):active {
     background-color: #184759;
 }
+
 .coop {
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
+    text-decoration: none;
+    color: #92d4ff;
 }
-.coop > :not(:first-child) {
-    margin-inline: auto;
-    font-weight: 600;
-}
+
 .coop:not(:disabled):hover {
     background-color: #165e7933;
     cursor: pointer;
 }
+
+.coop> :not(:first-child) {
+    margin-inline: auto;
+    font-weight: 600;
+}
+
 .coop:not(:disabled):focus-visible,
 .coop:not(:disabled):active {
     background-color: #18475922;
 }
+
 .splitter {
     margin-block: 15px;
     display: flex;
@@ -164,6 +212,7 @@ html:has(> body .fixbox) {
     gap: 10px;
     color: #92d4ffaa;
 }
+
 .splitter::before,
 .splitter::after {
     content: " ";
@@ -173,6 +222,7 @@ html:has(> body .fixbox) {
     margin-top: 4px;
     background-color: #92d4ff44;
 }
+
 .options {
     display: flex;
     width: 100%;
@@ -181,18 +231,30 @@ html:has(> body .fixbox) {
     flex-wrap: wrap;
     align-items: center;
 }
+
 .link {
     display: inline-block;
     text-decoration: none;
     color: #a7d3d5;
     transition: .2s ease;
 }
+
 .link:hover {
     color: #318cd1;
 }
 
-
-
+.connectSVG {
+    margin-block: 40px 20px;
+}
+.error {
+    font-weight: 500;
+    color: rgb(254, 100, 100);
+    font-size: 14px;
+    padding-inline: 5px;
+}
+.error:not(:empty) {
+    margin-top: 5px;
+}
 
 
 
@@ -205,9 +267,11 @@ html:has(> body .fixbox) {
     .proxy {
         display: none;
     }
+
     .authbox {
         background-color: #0008;
     }
+
     .footer {
         justify-content: center;
         gap: 10px;
