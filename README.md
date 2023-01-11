@@ -1,7 +1,12 @@
-# Tasks
+# Oasis Accounts
 
-A Task Manager to manage your Workspace tasks.
+## Usage
 
-## Deployment
+* Add **Accounts** folder to your project directroy.
+* Import ``..pathto/Accounts/Accounts.jsx`` as a component.
+* Route the component to the path ``/accounts/*``.
 
-This project is live on [https://shivamdevs-tasks.netlify.app](https://shivamdevs-tasks.netlify.app).
+## Required Packages
+
+* ``firebase``
+* ``react-router-dom``

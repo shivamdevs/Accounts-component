@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
-import Accounts from './components/Accounts/Accounts';
+import Accounts from './Accounts/Accounts';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(

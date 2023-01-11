@@ -1,7 +1,6 @@
 import { Link, Navigate, Route, Routes} from 'react-router-dom';
 import css from './Accounts.module.css';
 import { getCoverArt, setTitle } from './appdata';
-import { Toaster } from 'react-hot-toast';
 import { registerWithEmail, signInWithEmail, signInWithFacebook, signInWithGoogle } from './firebase';
 
 import LogoGoogle from './images/auth_google.svg';
@@ -13,7 +12,6 @@ import './override.css';
 function Accounts() {
     return (
         <div className={css.fixbox} style={{ backgroundImage: `url(${getCoverArt()})` }}>
-            <Toaster position="bottom-left" />
             <div className={css.row}>
                 <div className={`${css.container} ${css.proxy}`}></div>
                 <div className={css.container}>
