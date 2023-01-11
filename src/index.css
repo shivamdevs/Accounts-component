@@ -16,13 +16,3 @@ body, html, *, *::before, *::after, :host, :root {
     -webkit-tap-highlight-color: transparent;
     -moz-osx-font-smoothing: grayscale;
 }
-input, button, select, textarea {
-    font-family: inherit;
-    font-size: inherit;
-    font-weight: inherit;
-}
-
-img {
-    max-width: 100%;
-    max-height: 100%;
-}
