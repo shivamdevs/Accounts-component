@@ -1,17 +1,15 @@
-import { Link, Navigate, Route, Routes} from 'react-router-dom';
-import css from './Accounts.module.css';
-import { getCoverArt, setTitle } from './appdata';
-import { auth, registerWithEmail, signInWithEmail, signInWithFacebook, signInWithGoogle } from './firebase';
-import LogoGoogle from './images/auth_google.svg';
-import LogoFacebook from './images/auth_facebook.svg';
-import { useState } from 'react';
-import { useAuthState } from 'react-firebase-hooks/auth';
 import './override.css';
+import css from './Accounts.module.css';
+import React, { useState, useEffect } from 'react';
+import { AssetPath, getCoverArt, setTitle } from './appdata';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { Link, Navigate, Route, Routes } from 'react-router-dom';
+import { auth, registerWithEmail, signInWithEmail, signInWithFacebook, signInWithGoogle } from './firebase';
 function Accounts({onUserChange = null}) {
     const [user] = useAuthState(auth);
     useEffect(() => {
         if (user) onUserChange && onUserChange(user);
-    }, [user]);
+    }, [onUserChange, user]);
     return (
         <div className={css.fixbox} style={{ backgroundImage: `url(${getCoverArt()})` }}>
             <div className={css.row}>
@@ -59,6 +57,8 @@ function Signin() {
                 setEmailError(data.message) && e.target[0].focus();
             } else if (data.for === "password") {
                 setPassError(data.message) && e.target[1].focus();
+            } else if (data.for === "push") {
+                console.error(data.message);
             } else {
                 console.log(data);
             }
@@ -122,6 +122,8 @@ function Signup() {
                 setEmailError(data.message) && e.target[1].focus();
             } else if (data.for === "password") {
                 setPassError(data.message) && e.target[2].focus();
+            } else if (data.for === "push") {
+                console.error(data.message);
             } else {
                 console.log(data);
             }
@@ -211,6 +213,8 @@ function Provider() {
         if (data.type !== "success") {
             if (data.for === "popup") {
                 setPopError(data.message);
+            } else if (data.for === "push") {
+                console.error(data.message);
             } else {
                 console.log(data);
             }
@@ -224,6 +228,8 @@ function Provider() {
         if (data.type !== "success") {
             if (data.for === "popup") {
                 setPopError(data.message);
+            } else if (data.for === "push") {
+                console.error(data.message);
             } else {
                 console.log(data);
             }
@@ -235,7 +241,7 @@ function Provider() {
             <div className={css.title}>Connect with</div>
             <div className={css.group}>
                 <button className={`${css.button} ${css.coop}`} type="button" onClick={doGoogle} disabled={googleAuth}>
-                    <img src={LogoGoogle} alt="" />
+                    <img src={AssetPath + "auth_google.svg"} alt="" />
                     <SpinnerButton
                         spin={googleAuth}
                         text="Google"
@@ -245,7 +251,7 @@ function Provider() {
             </div>
             <div className={css.group}>
                 <button className={`${css.button} ${css.coop}`} type="button" onClick={doFacebook} disabled={facebookAuth}>
-                    <img src={LogoFacebook} alt="" />
+                    <img src={AssetPath + "auth_facebook.svg"} alt="" />
                     <SpinnerButton
                         spin={facebookAuth}
                         text="Facebook"

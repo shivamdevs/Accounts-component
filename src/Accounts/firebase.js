@@ -18,6 +18,7 @@ import {
     where,
     addDoc,
 } from "firebase/firestore";
+import { AssetPath } from "./appdata";
 const firebaseConfig = {
     apiKey: "AIzaSyAuT7owM2lF6JqmWUionKIM1vQ2pOHgzRM",
     authDomain: "my-oasis-tech.firebaseapp.com",
@@ -66,7 +67,7 @@ const signInWithGoogle = async () => {
                 name: user.displayName,
                 authProvider: "google",
                 email: user.email,
-                profile: user.photoURL || "https://cdn.jsdelivr.net/gh/shivamdevs/Oasis-Assets@master/Images/Accounts/user-no-image.svg",
+                profile: user.photoURL || (AssetPath + "user-no-image.svg"),
             });
         }
         return { type: "success" };
@@ -87,7 +88,7 @@ const signInWithFacebook = async () => {
                 name: user.displayName,
                 authProvider: "facebook",
                 email: user.email,
-                profile: user.photoURL || "https://cdn.jsdelivr.net/gh/shivamdevs/Oasis-Assets@master/Images/Accounts/user-no-image.svg",
+                profile: user.photoURL || (AssetPath + "user-no-image.svg"),
             });
         }
         return { type: "success" };
@@ -113,7 +114,7 @@ const registerWithEmail = async (name, email, password) => {
             name,
             authProvider: "local",
             email,
-            profile: "https://cdn.jsdelivr.net/gh/shivamdevs/Oasis-Assets@master/Images/Accounts/user-no-image.svg",
+            profile: (AssetPath + "user-no-image.svg"),
         });
         return { type: "success" };
     } catch (err) {
@@ -132,12 +133,12 @@ const logout = () => {
     signOut(auth);
 };
 export {
-    auth,
     db,
+    auth,
+    logout,
     signInWithEmail,
     signInWithGoogle,
-    signInWithFacebook,
     registerWithEmail,
     sendPasswordReset,
-    logout,
+    signInWithFacebook,
 };

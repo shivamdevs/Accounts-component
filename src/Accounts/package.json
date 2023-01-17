@@ -1,0 +1,21 @@
+{
+  "name": "myoasis-accounts",
+  "version": "1.0.8",
+  "description": "Account component for myoasis.tech",
+  "main": "Accounts.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "myoasis",
+    "accounts"
+  ],
+  "author": "ShivamDevs https://myoasis.tech",
+  "license": "MIT",
+  "peerDependencies": {
+    "firebase": ">=9",
+    "react": ">=18",
+    "react-firebase-hooks": ">=5",
+    "react-router-dom": ">=6"
+  }
+}
