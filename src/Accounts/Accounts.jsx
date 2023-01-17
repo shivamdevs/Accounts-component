@@ -1,15 +1,17 @@
 import { Link, Navigate, Route, Routes} from 'react-router-dom';
 import css from './Accounts.module.css';
 import { getCoverArt, setTitle } from './appdata';
-import { registerWithEmail, signInWithEmail, signInWithFacebook, signInWithGoogle } from './firebase';
-
+import { auth, registerWithEmail, signInWithEmail, signInWithFacebook, signInWithGoogle } from './firebase';
 import LogoGoogle from './images/auth_google.svg';
 import LogoFacebook from './images/auth_facebook.svg';
 import { useState } from 'react';
-
+import { useAuthState } from 'react-firebase-hooks/auth';
 import './override.css';
-
-function Accounts() {
+function Accounts({onUserChange = null}) {
+    const [user] = useAuthState(auth);
+    useEffect(() => {
+        if (user) onUserChange && onUserChange(user);
+    }, [user]);
     return (
         <div className={css.fixbox} style={{ backgroundImage: `url(${getCoverArt()})` }}>
             <div className={css.row}>
@@ -38,18 +40,14 @@ function Accounts() {
         </div>
     );
 }
-
 export default Accounts;
-
 function Signin() {
     setTitle("Sign in");
-
     const [disabled, setDisabled] = useState(false);
     const [email, setEmail] = useState("");
     const [emailError, setEmailError] = useState("");
     const [pass, setPass] = useState("");
     const [passError, setPassError] = useState("");
-
     const doSubmit = async (e) => {
         e.preventDefault();
         setDisabled(true);
@@ -100,10 +98,8 @@ function Signin() {
         </form>
     );
 }
-
 function Signup() {
     setTitle("Sign up");
-
     const [disabled, setDisabled] = useState(false);
     const [name, setName] = useState("");
     const [nameError, setNameError] = useState("");
@@ -111,7 +107,6 @@ function Signup() {
     const [emailError, setEmailError] = useState("");
     const [pass, setPass] = useState("");
     const [passError, setPassError] = useState("");
-
     const doSubmit = async (e) => {
         e.preventDefault();
         if (!name) return e.target[0].focus();
@@ -170,17 +165,13 @@ function Signup() {
         </form>
     );
 }
-
 function Recover() {
     setTitle("Recover");
-
     const [disabled, setDisabled] = useState(false);
-
     const doSubmit = (e) => {
         e.preventDefault();
         setDisabled(true);
     };
-
     return (
         <form className={css.login} onSubmit={doSubmit}>
             <div className={css.title}>
@@ -208,15 +199,11 @@ function Recover() {
         </form>
     );
 }
-
 function Provider() {
     setTitle("Provider");
-
     const [googleAuth, setGoogleAuth] = useState(false);
     const [facebookAuth, setFacebookAuth] = useState(false);
-
     const [popError, setPopError] = useState('');
-
     const doGoogle = async () => {
         setGoogleAuth(true);
         setPopError('');
@@ -230,7 +217,6 @@ function Provider() {
             return setGoogleAuth(false);
         }
     };
-
     const doFacebook = async () => {
         setFacebookAuth(true);
         setPopError('');
@@ -244,7 +230,6 @@ function Provider() {
             return setFacebookAuth(false);
         }
     };
-
     return (
         <div className={css.login}>
             <div className={css.title}>Connect with</div>
@@ -279,8 +264,6 @@ function Provider() {
         </div>
     )
 }
-
-
 function SpinnerButton({spin = false, color = "#fff", width = 10, children, text}) {
     return (
         <div className={css.spinner}>
