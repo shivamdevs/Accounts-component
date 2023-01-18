@@ -1,5 +1,5 @@
-html,
-:root {
+html:has(.fixbox),
+:root:has(.fixbox) {
     background-color: #0b1127;
     color-scheme: dark;
     color: #fff;
