@@ -178,7 +178,7 @@ const __accounts_firebase_upload_profile_photo = async (file, type, user, progre
             contentType: file.type,
         });
         uploadTask.on("state_changed", (snapshot) => {
-            progress((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+            progress(((snapshot.bytesTransferred / snapshot.totalBytes) * 100).toFixed(0));
         }, (err) => fallback(err), () => {
             getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
                 callback(downloadURL);

@@ -317,6 +317,14 @@ html:has(.fixbox),
     padding-block: 0;
 }
 
+.groupPhoto>img {
+    min-height: 100%;
+    max-height: initial !important;
+    min-width: 100%;
+    max-width: initial !important;
+    border-radius: 50%;
+}
+
 .groupFlow {
     display: flex;
     flex-wrap: nowrap;

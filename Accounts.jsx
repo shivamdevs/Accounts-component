@@ -1,5 +1,5 @@
 import './override.css';
-import css from './Accounts.module.css';
+import css from './index.module.css';
 import React, { useState, useEffect } from 'react';
 import {
     __accounts_asset_path,
@@ -27,8 +27,8 @@ function Accounts({ onUserChange = null }) {
                 <div className={css.container}>
                     <div className={css.authbox}>
                         <Routes>
-                            <Route path="/signin" element={<Signin />} />
-                            <Route path="/signup" element={<Signup />} />
+                            {/* <Route path="/signin" element={<Signin />} />
+                            <Route path="/signup" element={<Signup />} /> */}
                             <Route path="/recover" element={<Recover />} />
                             <Route path="/redirect" element={<Redirect onUserChange={onUserChange} />} />
                             <Route path="/profile" element={<Profile />} />
@@ -323,13 +323,13 @@ function Provider() {
                 </button>
             </div>
             <div className={css.error}><center>{popError}</center></div>
-            <div className={css.splitter}>or connect with</div>
+            {/* <div className={css.splitter}>or connect with</div>
             <div className={css.group}>
                 <Link className={`${css.button} ${css.coop}`} to={"/accounts/signin"}>
                     <i className="fas fa-envelope"></i>
                     <span>Email Address</span>
                 </Link>
-            </div>
+            </div> */}
         </div>
     )
 }
@@ -368,11 +368,13 @@ function Profile() {
         setPhotoErr("");
         if (!["image/jfif", "image/pjpeg", "image/jpeg", "image/pjp", "image/jpg", "image/png"].includes(file.type)) return setPhotoErr("Invalid photo type");
         setDisabled(true);
+        setPhoto(URL.createObjectURL(file));
         const type = (() => {
             const splits = file.name.split(".");
             return splits[splits.length - 1];
         })();
         __accounts_firebase_upload_profile_photo(file, type, user, setProgress, (url) => {
+            setPhoto(null);
             setPhoto(url);
             setDisabled(false);
             setProgress(null);
@@ -386,13 +388,13 @@ function Profile() {
             </div>
             {user && <>
                 <div className={`${css.group} ${css.groupPhoto}`}>
-                    <img src={photo || user.photoURL} alt="" />
+                    {(photo !== null || user.photoURL !== null) && <img src={photo || user.photoURL} alt="" />}
                     <input type="hidden" name="photo" disabled={disabled} id="user-photo" defaultValue={user.photoURL} onChange={({ target }) => setPhoto(target.value)} />
                     {progress !== null && <div className={css.progress}>{progress}%</div>}
                 </div>
                 <div className={css.groupFlow}>
                     <label className={css.link} htmlFor="user-input" type="submit" disabled={disabled}><SpinnerButton text="Upload" spin={disabled} color="#92d4ff" /></label>
-                    <input type="file" disabled={disabled} style={{ display: "none" }} id="user-input" accept='image/jpeg, image/jpg, image/png' onChange={({ target }) => setPhotoFile(target.files[0])} />
+                    <input type="file" disabled={disabled} style={{ display: "none" }} id="user-input" accept='image/jpeg, image/jpg, image/png' onChange={({ target }) => target.files?.length && setPhotoFile(target.files[0])} />
                     <div className={css.link} type="submit" onClick={() => !disabled && setPhoto((__accounts_asset_path + "user-no-image.svg"))}><SpinnerButton text="Remove" spin={disabled} color="#92d4ff" /></div>
                 </div>
                 <div className={css.error}>{photoErr}</div>
