@@ -17,5 +17,13 @@
     "react": ">=18",
     "react-firebase-hooks": ">=5",
     "react-router-dom": ">=6"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shivamdevs/Accounts-component.git"
+  },
+  "bugs": {
+    "url": "https://github.com/shivamdevs/Accounts-component/issues"
+  },
+  "homepage": "https://github.com/shivamdevs/Accounts-component#readme"
 }
