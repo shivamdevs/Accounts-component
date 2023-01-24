@@ -57,8 +57,6 @@ function formatAuth(err) {
         return (result.for = "push") && (result.message = "Network request failed, check your internet connection") && result;
     } else if (error.includes('')) {
         return (result.for = "") && (result.message = "") && result;
-    } else if (error.includes('')) {
-        return (result.for = "") && (result.message = "") && result;
     }
     return result;
 }
@@ -77,7 +75,6 @@ const __accounts_firebase_signin_with_google = async () => {
                 email: user.email,
                 profile: user.photoURL || (__accounts_asset_path + "user-no-image.svg"),
                 created: Date.now(),
-                updated: Date.now(),
             });
         }
         return { type: "success" };
@@ -100,7 +97,6 @@ const __accounts_firebase_signin_with_facebook = async () => {
                 email: user.email,
                 profile: user.photoURL || (__accounts_asset_path + "user-no-image.svg"),
                 created: Date.now(),
-                updated: Date.now(),
             });
         }
         return { type: "success" };
@@ -128,7 +124,6 @@ const __accounts_firebase_signup_with_email = async (name, email, password) => {
             email,
             profile: (__accounts_asset_path + "user-no-image.svg"),
             created: Date.now(),
-            updated: Date.now(),
         });
         return { type: "success" };
     } catch (err) {
@@ -188,6 +183,16 @@ const __accounts_firebase_upload_profile_photo = async (file, type, user, progre
         fallback(err);
     }
 }
+const __accounts_firebase_check_update_status = async (user) => {
+    try {
+        const q = query(collection(db, "users"), where("uid", "==", user.uid));
+        const docs = await getDocs(q);
+        for (const data of docs.docs) return { type: "success", message: data.data().updated };
+        return { type: "success", message: false };
+    } catch (err) {
+        return formatAuth(err);
+    }
+};
 export {
     __accounts_firebase_auth,
     __accounts_firebase_logout,
@@ -195,6 +200,7 @@ export {
     __accounts_firebase_signin_with_email,
     __accounts_firebase_signup_with_email,
     __accounts_firebase_signin_with_google,
+    __accounts_firebase_check_update_status,
     __accounts_firebase_send_password_reset,
     __accounts_firebase_signin_with_facebook,
     __accounts_firebase_upload_profile_photo,

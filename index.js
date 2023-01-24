@@ -22,7 +22,11 @@ function Accounts({
         style: {
             backgroundImage: `url(${(0, _appdata.__accounts_get_cover_art)()})`
         }
-    }, /*#__PURE__*/_react.default.createElement("div", {
+    }, /*#__PURE__*/_react.default.createElement(_reactRouterDom.Link, {
+        className: _indexModule.default.fixblock,
+        to: "/accounts/hidden-signin",
+        replace: true
+    }), /*#__PURE__*/_react.default.createElement("div", {
         className: _indexModule.default.row
     }, /*#__PURE__*/_react.default.createElement("div", {
         className: `${_indexModule.default.container} ${_indexModule.default.proxy}`
@@ -31,7 +35,13 @@ function Accounts({
     }, /*#__PURE__*/_react.default.createElement("div", {
         className: _indexModule.default.authbox
     }, /*#__PURE__*/_react.default.createElement(_reactRouterDom.Routes, null, /*#__PURE__*/_react.default.createElement(_reactRouterDom.Route, {
-        path: "/recover",
+        path: "/hidden-signin",
+        element: /*#__PURE__*/_react.default.createElement(Signin, null)
+    }), /*#__PURE__*/_react.default.createElement(_reactRouterDom.Route, {
+        path: "/hidden-signup",
+        element: /*#__PURE__*/_react.default.createElement(Signup, null)
+    }), /*#__PURE__*/_react.default.createElement(_reactRouterDom.Route, {
+        path: "/hidden-recover",
         element: /*#__PURE__*/_react.default.createElement(Recover, null)
     }), /*#__PURE__*/_react.default.createElement(_reactRouterDom.Route, {
         path: "/redirect",
@@ -80,25 +90,26 @@ exports.default = _default;
 function Redirect({
     onUserChange = null
 }) {
-    const [user] = (0, _auth.useAuthState)(_firebase.__accounts_firebase_auth);
+    const [user, loading] = (0, _auth.useAuthState)(_firebase.__accounts_firebase_auth);
     const navigate = (0, _reactRouterDom.useNavigate)();
     (0, _react.useEffect)(() => {
-        if (user) {
-            if (onUserChange) {
-                onUserChange(user);
+        if (!loading) {
+            if (user) {
+                if (onUserChange) {
+                    onUserChange(user);
+                } else {
+                    navigate("/", {
+                        replace: true
+                    });
+                }
             } else {
-                navigate("/", {
+                navigate("/accounts/provider", {
                     replace: true
                 });
             }
-        } else {
-            navigate("/accounts/provider", {
-                replace: true
-            });
         }
-    }, [navigate, onUserChange, user]);
+    }, [navigate, onUserChange, user, loading]);
 }
-;
 function Signin() {
     (0, _appdata.__accounts_set_title)("Sign in");
     const [disabled, setDisabled] = (0, _react.useState)(false);
@@ -109,9 +120,20 @@ function Signin() {
     const [user] = (0, _auth.useAuthState)(_firebase.__accounts_firebase_auth);
     const navigate = (0, _reactRouterDom.useNavigate)();
     (0, _react.useEffect)(() => {
-        if (user) navigate("/accounts/redirect", {
-            replace: true
-        });
+        user && (async () => {
+            const status = await (0, _firebase.__accounts_firebase_check_update_status)(user);
+            if (status.type === "success") {
+                if (status.message) {
+                    navigate("/accounts/redirect", {
+                        replace: true
+                    });
+                } else {
+                    navigate("/accounts/profile", {
+                        replace: true
+                    });
+                }
+            }
+        })();
     }, [navigate, user]);
     const doSubmit = async e => {
         e.preventDefault();
@@ -139,7 +161,8 @@ function Signin() {
         className: _indexModule.default.title
     }, /*#__PURE__*/_react.default.createElement(_reactRouterDom.Link, {
         className: _indexModule.default.titleArrow,
-        to: -1
+        to: "/accounts/provider",
+        replace: true
     }, /*#__PURE__*/_react.default.createElement("i", {
         className: "far fa-arrow-left-long"
     })), /*#__PURE__*/_react.default.createElement("span", null, "Sign in")), /*#__PURE__*/_react.default.createElement("div", {
@@ -194,10 +217,12 @@ function Signin() {
     }, "or don't have an account?"), /*#__PURE__*/_react.default.createElement("div", {
         className: _indexModule.default.options
     }, /*#__PURE__*/_react.default.createElement(_reactRouterDom.Link, {
-        to: "/accounts/signup",
+        to: "/accounts/hidden-signup",
+        replace: true,
         className: _indexModule.default.link
     }, "Create Account"), /*#__PURE__*/_react.default.createElement(_reactRouterDom.Link, {
-        to: "/accounts/recover",
+        to: "/accounts/hidden-recover",
+        replace: true,
         className: _indexModule.default.link
     }, "Forgot password?")));
 }
@@ -213,15 +238,9 @@ function Signup() {
     const [user] = (0, _auth.useAuthState)(_firebase.__accounts_firebase_auth);
     const navigate = (0, _reactRouterDom.useNavigate)();
     (0, _react.useEffect)(() => {
-        if (user) {
-            if (user.metadata.creationTime === user.metadata.lastSignInTime) {
-                navigate("/accounts/profile");
-            } else {
-                navigate("/accounts/redirect", {
-                    replace: true
-                });
-            }
-        }
+        user && navigate("/accounts/profile", {
+            replace: true
+        });
     }, [navigate, user]);
     const doSubmit = async e => {
         e.preventDefault();
@@ -253,7 +272,8 @@ function Signup() {
         className: _indexModule.default.title
     }, /*#__PURE__*/_react.default.createElement(_reactRouterDom.Link, {
         className: _indexModule.default.titleArrow,
-        to: -1
+        to: "/accounts/hidden-signin",
+        replace: true
     }, /*#__PURE__*/_react.default.createElement("i", {
         className: "far fa-arrow-left-long"
     })), /*#__PURE__*/_react.default.createElement("span", null, "Sign up")), /*#__PURE__*/_react.default.createElement("div", {
@@ -326,7 +346,8 @@ function Signup() {
     }, "Already have an Account?"), /*#__PURE__*/_react.default.createElement("div", {
         className: _indexModule.default.options
     }, /*#__PURE__*/_react.default.createElement(_reactRouterDom.Link, {
-        to: "/accounts/signin",
+        to: "/accounts/hidden-signin",
+        replace: true,
         className: _indexModule.default.link
     }, "Login instead")));
 }
@@ -344,7 +365,8 @@ function Recover() {
         className: _indexModule.default.title
     }, /*#__PURE__*/_react.default.createElement(_reactRouterDom.Link, {
         className: _indexModule.default.titleArrow,
-        to: -1
+        to: "/accounts/hidden-signin",
+        replace: true
     }, /*#__PURE__*/_react.default.createElement("i", {
         className: "far fa-arrow-left-long"
     })), /*#__PURE__*/_react.default.createElement("span", null, "Recover Password")), /*#__PURE__*/_react.default.createElement("div", {
@@ -378,7 +400,8 @@ function Recover() {
     }, "or remembered password?"), /*#__PURE__*/_react.default.createElement("div", {
         className: _indexModule.default.options
     }, /*#__PURE__*/_react.default.createElement(_reactRouterDom.Link, {
-        to: "/accounts/signin",
+        to: "/accounts/hidden-signin",
+        replace: true,
         className: _indexModule.default.link
     }, "Back to login")));
 }
@@ -390,15 +413,20 @@ function Provider() {
     const [user] = (0, _auth.useAuthState)(_firebase.__accounts_firebase_auth);
     const navigate = (0, _reactRouterDom.useNavigate)();
     (0, _react.useEffect)(() => {
-        if (user) {
-            if (user.metadata.creationTime === user.metadata.lastSignInTime) {
-                navigate("/accounts/profile");
-            } else {
-                navigate("/accounts/redirect", {
-                    replace: true
-                });
+        user && (async () => {
+            const status = await (0, _firebase.__accounts_firebase_check_update_status)(user);
+            if (status.type === "success") {
+                if (status.message) {
+                    navigate("/accounts/redirect", {
+                        replace: true
+                    });
+                } else {
+                    navigate("/accounts/profile", {
+                        replace: true
+                    });
+                }
             }
-        }
+        })();
     }, [navigate, user]);
     const doGoogle = async () => {
         setGoogleAuth(true);

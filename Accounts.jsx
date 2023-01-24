@@ -10,11 +10,12 @@ import { useAuthState } from 'react-firebase-hooks/auth';
 import { Link, Navigate, Route, Routes, useNavigate } from 'react-router-dom';
 import {
     __accounts_firebase_auth,
-    __accounts_firebase_signup_with_email,
-    __accounts_firebase_signin_with_facebook,
-    __accounts_firebase_signin_with_email,
-    __accounts_firebase_signin_with_google,
     __accounts_firebase_profile_update,
+    __accounts_firebase_signin_with_email,
+    __accounts_firebase_signup_with_email,
+    __accounts_firebase_signin_with_google,
+    __accounts_firebase_check_update_status,
+    __accounts_firebase_signin_with_facebook,
     __accounts_firebase_upload_profile_photo,
 } from './firebase';
 
@@ -22,14 +23,15 @@ import {
 function Accounts({ onUserChange = null }) {
     return (
         <div className={css.fixbox} style={{ backgroundImage: `url(${__accounts_get_cover_art()})` }}>
+            <Link className={css.fixblock} to="/accounts/hidden-signin" replace={true}></Link>
             <div className={css.row}>
                 <div className={`${css.container} ${css.proxy}`}></div>
                 <div className={css.container}>
                     <div className={css.authbox}>
                         <Routes>
-                            {/* <Route path="/signin" element={<Signin />} />
-                            <Route path="/signup" element={<Signup />} /> */}
-                            <Route path="/recover" element={<Recover />} />
+                            <Route path="/hidden-signin" element={<Signin />} />
+                            <Route path="/hidden-signup" element={<Signup />} />
+                            <Route path="/hidden-recover" element={<Recover />} />
                             <Route path="/redirect" element={<Redirect onUserChange={onUserChange} />} />
                             <Route path="/profile" element={<Profile />} />
                             <Route path="/provider" element={<Provider />} />
@@ -52,20 +54,22 @@ function Accounts({ onUserChange = null }) {
 }
 export default Accounts;
 function Redirect({ onUserChange = null }) {
-    const [user] = useAuthState(__accounts_firebase_auth);
+    const [user, loading] = useAuthState(__accounts_firebase_auth);
     const navigate = useNavigate();
     useEffect(() => {
-        if (user) {
-            if (onUserChange) {
-                onUserChange(user);
+        if (!loading) {
+            if (user) {
+                if (onUserChange) {
+                    onUserChange(user);
+                } else {
+                    navigate("/", { replace: true });
+                }
             } else {
-                navigate("/", { replace: true });
+                navigate("/accounts/provider", { replace: true });
             }
-        } else {
-            navigate("/accounts/provider", { replace: true });
         }
-    }, [navigate, onUserChange, user]);
-};
+    }, [navigate, onUserChange, user, loading]);
+}
 function Signin() {
     __accounts_set_title("Sign in");
     const [disabled, setDisabled] = useState(false);
@@ -78,7 +82,16 @@ function Signin() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        if (user) navigate("/accounts/redirect", { replace: true });
+        user && (async () => {
+            const status = await __accounts_firebase_check_update_status(user);
+            if (status.type === "success") {
+                if (status.message) {
+                    navigate("/accounts/redirect", { replace: true });
+                } else {
+                    navigate("/accounts/profile", { replace: true });
+                }
+            }
+        })();
     }, [navigate, user]);
 
     const doSubmit = async (e) => {
@@ -103,7 +116,7 @@ function Signin() {
     return (
         <form className={css.login} onSubmit={doSubmit}>
             <div className={css.title}>
-                <Link className={css.titleArrow} to={-1}><i className="far fa-arrow-left-long"></i></Link>
+                <Link className={css.titleArrow} to="/accounts/provider" replace={true}><i className="far fa-arrow-left-long"></i></Link>
                 <span>Sign in</span>
             </div>
             <div className={css.group}>
@@ -127,8 +140,8 @@ function Signin() {
             </div>
             <div className={css.splitter}>or don't have an account?</div>
             <div className={css.options}>
-                <Link to="/accounts/signup" className={css.link}>Create Account</Link>
-                <Link to="/accounts/recover" className={css.link}>Forgot password?</Link>
+                <Link to="/accounts/hidden-signup" replace={true} className={css.link}>Create Account</Link>
+                <Link to="/accounts/hidden-recover" replace={true} className={css.link}>Forgot password?</Link>
             </div>
         </form>
     );
@@ -147,13 +160,7 @@ function Signup() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        if (user) {
-            if (user.metadata.creationTime === user.metadata.lastSignInTime) {
-                navigate("/accounts/profile");
-            } else {
-                navigate("/accounts/redirect", { replace: true });
-            }
-        }
+        user && navigate("/accounts/profile", { replace: true });
     }, [navigate, user]);
 
     const doSubmit = async (e) => {
@@ -182,7 +189,7 @@ function Signup() {
     return (
         <form className={css.login} onSubmit={doSubmit}>
             <div className={css.title}>
-                <Link className={css.titleArrow} to={-1}><i className="far fa-arrow-left-long"></i></Link>
+                <Link className={css.titleArrow} to="/accounts/hidden-signin" replace={true}><i className="far fa-arrow-left-long"></i></Link>
                 <span>Sign up</span>
             </div>
             <div className={css.group}>
@@ -211,7 +218,7 @@ function Signup() {
             </div>
             <div className={css.splitter}>Already have an Account?</div>
             <div className={css.options}>
-                <Link to="/accounts/signin" className={css.link}>Login instead</Link>
+                <Link to="/accounts/hidden-signin" replace={true} className={css.link}>Login instead</Link>
             </div>
         </form>
     );
@@ -226,7 +233,7 @@ function Recover() {
     return (
         <form className={css.login} onSubmit={doSubmit}>
             <div className={css.title}>
-                <Link className={css.titleArrow} to={-1}><i className="far fa-arrow-left-long"></i></Link>
+                <Link className={css.titleArrow} to="/accounts/hidden-signin" replace={true}><i className="far fa-arrow-left-long"></i></Link>
                 <span>Recover Password</span>
             </div>
             <div className={css.group}>
@@ -245,7 +252,7 @@ function Recover() {
             </div>
             <div className={css.splitter}>or remembered password?</div>
             <div className={css.options}>
-                <Link to="/accounts/signin" className={css.link}>Back to login</Link>
+                <Link to="/accounts/hidden-signin" replace={true} className={css.link}>Back to login</Link>
             </div>
         </form>
     );
@@ -260,13 +267,16 @@ function Provider() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        if (user) {
-            if (user.metadata.creationTime === user.metadata.lastSignInTime) {
-                navigate("/accounts/profile");
-            } else {
-                navigate("/accounts/redirect", { replace: true });
+        user && (async () => {
+            const status = await __accounts_firebase_check_update_status(user);
+            if (status.type === "success") {
+                if (status.message) {
+                    navigate("/accounts/redirect", { replace: true });
+                } else {
+                    navigate("/accounts/profile", { replace: true });
+                }
             }
-        }
+        })();
     }, [navigate, user]);
 
     const doGoogle = async () => {
@@ -325,7 +335,7 @@ function Provider() {
             <div className={css.error}><center>{popError}</center></div>
             {/* <div className={css.splitter}>or connect with</div>
             <div className={css.group}>
-                <Link className={`${css.button} ${css.coop}`} to={"/accounts/signin"}>
+                <Link className={`${css.button} ${css.coop}`} to="/accounts/hidden-signin" replace={true}>
                     <i className="fas fa-envelope"></i>
                     <span>Email Address</span>
                 </Link>
