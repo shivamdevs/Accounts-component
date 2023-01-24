@@ -1,8 +1,8 @@
 {
   "name": "myoasis-accounts",
-  "version": "1.0.9",
+  "version": "1.1.2",
   "description": "Account component for myoasis.tech",
-  "main": "Accounts.js",
+  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

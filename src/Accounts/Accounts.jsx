@@ -1,17 +1,27 @@
 import './override.css';
 import css from './Accounts.module.css';
 import React, { useState, useEffect } from 'react';
-import { AssetPath, getCoverArt, setTitle } from './appdata';
+import {
+    __accounts_asset_path,
+    __accounts_set_title,
+    __accounts_get_cover_art,
+} from './appdata';
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { Link, Navigate, Route, Routes } from 'react-router-dom';
-import { auth, registerWithEmail, signInWithEmail, signInWithFacebook, signInWithGoogle } from './firebase';
-function Accounts({onUserChange = null}) {
-    const [user] = useAuthState(auth);
-    useEffect(() => {
-        if (user) onUserChange && onUserChange(user);
-    }, [onUserChange, user]);
+import { Link, Navigate, Route, Routes, useNavigate } from 'react-router-dom';
+import {
+    __accounts_firebase_auth,
+    __accounts_firebase_signup_with_email,
+    __accounts_firebase_signin_with_facebook,
+    __accounts_firebase_signin_with_email,
+    __accounts_firebase_signin_with_google,
+    __accounts_firebase_profile_update,
+    __accounts_firebase_upload_profile_photo,
+} from './firebase';
+
+
+function Accounts({ onUserChange = null }) {
     return (
-        <div className={css.fixbox} style={{ backgroundImage: `url(${getCoverArt()})` }}>
+        <div className={css.fixbox} style={{ backgroundImage: `url(${__accounts_get_cover_art()})` }}>
             <div className={css.row}>
                 <div className={`${css.container} ${css.proxy}`}></div>
                 <div className={css.container}>
@@ -20,6 +30,8 @@ function Accounts({onUserChange = null}) {
                             <Route path="/signin" element={<Signin />} />
                             <Route path="/signup" element={<Signup />} />
                             <Route path="/recover" element={<Recover />} />
+                            <Route path="/redirect" element={<Redirect onUserChange={onUserChange} />} />
+                            <Route path="/profile" element={<Profile />} />
                             <Route path="/provider" element={<Provider />} />
                             <Route exact path="/" element={<Navigate to="/accounts/provider" replace />} />
                         </Routes>
@@ -39,19 +51,42 @@ function Accounts({onUserChange = null}) {
     );
 }
 export default Accounts;
+function Redirect({ onUserChange = null }) {
+    const [user] = useAuthState(__accounts_firebase_auth);
+    const navigate = useNavigate();
+    useEffect(() => {
+        if (user) {
+            if (onUserChange) {
+                onUserChange(user);
+            } else {
+                navigate("/", { replace: true });
+            }
+        } else {
+            navigate("/accounts/provider", { replace: true });
+        }
+    }, [navigate, onUserChange, user]);
+};
 function Signin() {
-    setTitle("Sign in");
+    __accounts_set_title("Sign in");
     const [disabled, setDisabled] = useState(false);
     const [email, setEmail] = useState("");
     const [emailError, setEmailError] = useState("");
     const [pass, setPass] = useState("");
     const [passError, setPassError] = useState("");
+
+    const [user] = useAuthState(__accounts_firebase_auth);
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (user) navigate("/accounts/redirect", { replace: true });
+    }, [navigate, user]);
+
     const doSubmit = async (e) => {
         e.preventDefault();
         setDisabled(true);
         setEmailError("");
         setPassError("");
-        const data = await signInWithEmail(email, pass);
+        const data = await __accounts_firebase_signin_with_email(email, pass);
         if (data.type !== "success") {
             if (data.for === "email") {
                 setEmailError(data.message) && e.target[0].focus();
@@ -99,7 +134,7 @@ function Signin() {
     );
 }
 function Signup() {
-    setTitle("Sign up");
+    __accounts_set_title("Sign up");
     const [disabled, setDisabled] = useState(false);
     const [name, setName] = useState("");
     const [nameError, setNameError] = useState("");
@@ -107,6 +142,20 @@ function Signup() {
     const [emailError, setEmailError] = useState("");
     const [pass, setPass] = useState("");
     const [passError, setPassError] = useState("");
+
+    const [user] = useAuthState(__accounts_firebase_auth);
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (user) {
+            if (user.metadata.creationTime === user.metadata.lastSignInTime) {
+                navigate("/accounts/profile");
+            } else {
+                navigate("/accounts/redirect", { replace: true });
+            }
+        }
+    }, [navigate, user]);
+
     const doSubmit = async (e) => {
         e.preventDefault();
         if (!name) return e.target[0].focus();
@@ -114,7 +163,7 @@ function Signup() {
         setNameError("");
         setEmailError("");
         setPassError("");
-        const data = await registerWithEmail(name, email, pass);
+        const data = await __accounts_firebase_signup_with_email(name, email, pass);
         if (data.type !== "success") {
             if (data.for === "name") {
                 setNameError(data.message) && e.target[0].focus();
@@ -168,7 +217,7 @@ function Signup() {
     );
 }
 function Recover() {
-    setTitle("Recover");
+    __accounts_set_title("Recover");
     const [disabled, setDisabled] = useState(false);
     const doSubmit = (e) => {
         e.preventDefault();
@@ -202,14 +251,28 @@ function Recover() {
     );
 }
 function Provider() {
-    setTitle("Provider");
+    __accounts_set_title("Provider");
     const [googleAuth, setGoogleAuth] = useState(false);
     const [facebookAuth, setFacebookAuth] = useState(false);
     const [popError, setPopError] = useState('');
+
+    const [user] = useAuthState(__accounts_firebase_auth);
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (user) {
+            if (user.metadata.creationTime === user.metadata.lastSignInTime) {
+                navigate("/accounts/profile");
+            } else {
+                navigate("/accounts/redirect", { replace: true });
+            }
+        }
+    }, [navigate, user]);
+
     const doGoogle = async () => {
         setGoogleAuth(true);
         setPopError('');
-        const data = await signInWithGoogle();
+        const data = await __accounts_firebase_signin_with_google();
         if (data.type !== "success") {
             if (data.for === "popup") {
                 setPopError(data.message);
@@ -224,7 +287,7 @@ function Provider() {
     const doFacebook = async () => {
         setFacebookAuth(true);
         setPopError('');
-        const data = await signInWithFacebook();
+        const data = await __accounts_firebase_signin_with_facebook();
         if (data.type !== "success") {
             if (data.for === "popup") {
                 setPopError(data.message);
@@ -241,7 +304,7 @@ function Provider() {
             <div className={css.title}>Connect with</div>
             <div className={css.group}>
                 <button className={`${css.button} ${css.coop}`} type="button" onClick={doGoogle} disabled={googleAuth}>
-                    <img src={AssetPath + "auth_google.svg"} alt="" />
+                    <img src={__accounts_asset_path + "auth_google.svg"} alt="" />
                     <SpinnerButton
                         spin={googleAuth}
                         text="Google"
@@ -251,7 +314,7 @@ function Provider() {
             </div>
             <div className={css.group}>
                 <button className={`${css.button} ${css.coop}`} type="button" onClick={doFacebook} disabled={facebookAuth}>
-                    <img src={AssetPath + "auth_facebook.svg"} alt="" />
+                    <img src={__accounts_asset_path + "auth_facebook.svg"} alt="" />
                     <SpinnerButton
                         spin={facebookAuth}
                         text="Facebook"
@@ -270,7 +333,88 @@ function Provider() {
         </div>
     )
 }
-function SpinnerButton({spin = false, color = "#fff", width = 10, children, text}) {
+function Profile() {
+    __accounts_set_title("Profile");
+    const [disabled, setDisabled] = useState(false);
+    const [name, setName] = useState("");
+    const [nameError, setNameError] = useState("");
+    const [photo, setPhoto] = useState("");
+    const [photoErr, setPhotoErr] = useState("");
+    const [progress, setProgress] = useState(null);
+
+    const [user] = useAuthState(__accounts_firebase_auth);
+    const navigate = useNavigate();
+
+    const doSubmit = async (e) => {
+        e.preventDefault();
+        setDisabled(true);
+        setPhotoErr("");
+        setNameError("");
+        const data = await __accounts_firebase_profile_update(user, (name || user.displayName), (photo || user.photoURL));
+        if (data.type !== "success") {
+            if (data.for === "name") {
+                setNameError(data.message) && e.target[2].focus();
+            } else if (data.for === "push") {
+                console.error(data.message);
+            } else {
+                console.log(data);
+            }
+            return setDisabled(false);
+        }
+        navigate("/accounts/redirect", { replace: true });
+    };
+
+    const setPhotoFile = async (file) => {
+        setPhotoErr("");
+        if (!["image/jfif", "image/pjpeg", "image/jpeg", "image/pjp", "image/jpg", "image/png"].includes(file.type)) return setPhotoErr("Invalid photo type");
+        setDisabled(true);
+        const type = (() => {
+            const splits = file.name.split(".");
+            return splits[splits.length - 1];
+        })();
+        __accounts_firebase_upload_profile_photo(file, type, user, setProgress, (url) => {
+            setPhoto(url);
+            setDisabled(false);
+            setProgress(null);
+        }, (err) => setPhotoErr(String(err)));
+    };
+
+    return (
+        <form className={css.login} onSubmit={doSubmit}>
+            <div className={css.title}>
+                <span>Profile</span>
+            </div>
+            {user && <>
+                <div className={`${css.group} ${css.groupPhoto}`}>
+                    <img src={photo || user.photoURL} alt="" />
+                    <input type="hidden" name="photo" disabled={disabled} id="user-photo" defaultValue={user.photoURL} onChange={({ target }) => setPhoto(target.value)} />
+                    {progress !== null && <div className={css.progress}>{progress}%</div>}
+                </div>
+                <div className={css.groupFlow}>
+                    <label className={css.link} htmlFor="user-input" type="submit" disabled={disabled}><SpinnerButton text="Upload" spin={disabled} color="#92d4ff" /></label>
+                    <input type="file" disabled={disabled} style={{ display: "none" }} id="user-input" accept='image/jpeg, image/jpg, image/png' onChange={({ target }) => setPhotoFile(target.files[0])} />
+                    <div className={css.link} type="submit" onClick={() => !disabled && setPhoto((__accounts_asset_path + "user-no-image.svg"))}><SpinnerButton text="Remove" spin={disabled} color="#92d4ff" /></div>
+                </div>
+                <div className={css.error}>{photoErr}</div>
+                <div className={css.group}>
+                    <label htmlFor="user-name" className={css.label}>Full name</label>
+                    <input type="text" autoComplete='name' autoFocus disabled={disabled} name="name" className={css.input} id="user-name" required defaultValue={user.displayName} onChange={({ target }) => setName(target.value.trim())} />
+                    <div className={css.error}>{nameError}</div>
+                </div>
+                <div className={css.group}>
+                    <button className={`${css.button} ${css.action}`} type="submit" disabled={disabled}>
+                        <SpinnerButton
+                            spin={disabled}
+                            text="Save and Continue"
+                            color="#92d4ff"
+                        />
+                    </button>
+                </div>
+            </>}
+        </form>
+    );
+}
+function SpinnerButton({ spin = false, color = "#fff", width = 10, children, text }) {
     return (
         <div className={css.spinner}>
             {spin && <>

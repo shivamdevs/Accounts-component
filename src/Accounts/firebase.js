@@ -9,6 +9,7 @@ import {
     signOut,
     FacebookAuthProvider,
     updateProfile,
+    sendEmailVerification,
 } from "firebase/auth";
 import {
     getFirestore,
@@ -17,8 +18,14 @@ import {
     collection,
     where,
     addDoc,
+    updateDoc,
+    doc,
 } from "firebase/firestore";
-import { AssetPath } from "./appdata";
+import {
+    getDownloadURL,
+    getStorage, ref, uploadBytesResumable
+} from 'firebase/storage';
+import { __accounts_asset_path } from "./appdata";
 const firebaseConfig = {
     apiKey: "AIzaSyAuT7owM2lF6JqmWUionKIM1vQ2pOHgzRM",
     authDomain: "my-oasis-tech.firebaseapp.com",
@@ -29,8 +36,9 @@ const firebaseConfig = {
     measurementId: "G-WJZGXF8F3L"
 };
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+const __accounts_firebase_auth = getAuth(app);
 const db = getFirestore(app);
+const storage = getStorage();
 function formatAuth(err) {
     const result = { type: "error", for: "", message: "" };
     const error = String(err);
@@ -55,9 +63,9 @@ function formatAuth(err) {
     return result;
 }
 const googleProvider = new GoogleAuthProvider();
-const signInWithGoogle = async () => {
+const __accounts_firebase_signin_with_google = async () => {
     try {
-        const res = await signInWithPopup(auth, googleProvider);
+        const res = await signInWithPopup(__accounts_firebase_auth, googleProvider);
         const user = res.user;
         const q = query(collection(db, "users"), where("uid", "==", user.uid));
         const docs = await getDocs(q);
@@ -67,7 +75,9 @@ const signInWithGoogle = async () => {
                 name: user.displayName,
                 authProvider: "google",
                 email: user.email,
-                profile: user.photoURL || (AssetPath + "user-no-image.svg"),
+                profile: user.photoURL || (__accounts_asset_path + "user-no-image.svg"),
+                created: Date.now(),
+                updated: Date.now(),
             });
         }
         return { type: "success" };
@@ -76,9 +86,9 @@ const signInWithGoogle = async () => {
     }
 };
 const facebookProvider = new FacebookAuthProvider();
-const signInWithFacebook = async () => {
+const __accounts_firebase_signin_with_facebook = async () => {
     try {
-        const res = await signInWithPopup(auth, facebookProvider);
+        const res = await signInWithPopup(__accounts_firebase_auth, facebookProvider);
         const user = res.user;
         const q = query(collection(db, "users"), where("uid", "==", user.uid));
         const docs = await getDocs(q);
@@ -88,7 +98,9 @@ const signInWithFacebook = async () => {
                 name: user.displayName,
                 authProvider: "facebook",
                 email: user.email,
-                profile: user.photoURL || (AssetPath + "user-no-image.svg"),
+                profile: user.photoURL || (__accounts_asset_path + "user-no-image.svg"),
+                created: Date.now(),
+                updated: Date.now(),
             });
         }
         return { type: "success" };
@@ -96,17 +108,17 @@ const signInWithFacebook = async () => {
         return formatAuth(err);
     }
 };
-const signInWithEmail = async (email, password) => {
+const __accounts_firebase_signin_with_email = async (email, password) => {
     try {
-        await signInWithEmailAndPassword(auth, email, password);
+        await signInWithEmailAndPassword(__accounts_firebase_auth, email, password);
         return { type: "success" };
     } catch (err) {
         return formatAuth(err);
     }
 };
-const registerWithEmail = async (name, email, password) => {
+const __accounts_firebase_signup_with_email = async (name, email, password) => {
     try {
-        const res = await createUserWithEmailAndPassword(auth, email, password);
+        const res = await createUserWithEmailAndPassword(__accounts_firebase_auth, email, password);
         const user = res.user;
         await updateProfile(user, { displayName: name });
         await addDoc(collection(db, "users"), {
@@ -114,31 +126,77 @@ const registerWithEmail = async (name, email, password) => {
             name,
             authProvider: "local",
             email,
-            profile: (AssetPath + "user-no-image.svg"),
+            profile: (__accounts_asset_path + "user-no-image.svg"),
+            created: Date.now(),
+            updated: Date.now(),
         });
         return { type: "success" };
     } catch (err) {
         return formatAuth(err);
     }
 };
-const sendPasswordReset = async (email) => {
+const __accounts_firebase_send_password_reset = async (email) => {
     try {
-        await sendPasswordResetEmail(auth, email);
+        await sendPasswordResetEmail(__accounts_firebase_auth, email);
         return { type: "success" };
     } catch (err) {
         return formatAuth(err);
     }
 };
-const logout = () => {
-    signOut(auth);
+const __accounts_firebase_send_verification_email = async (user) => {
+    try {
+        const link = await sendEmailVerification(user);
+        console.log(link);
+    } catch (err) {
+        return formatAuth(err);
+    }
 };
+const __accounts_firebase_logout = () => {
+    signOut(__accounts_firebase_auth);
+};
+const __accounts_firebase_profile_update = async (user, name, photo) => {
+    try {
+        await updateProfile(user, { displayName: name, photoURL: photo });
+        const q = query(collection(db, "users"), where("uid", "==", user.uid));
+        const docs = await getDocs(q);
+        for (const data of docs.docs) {
+            await updateDoc(doc(db, "users", data.id), {
+                name: name,
+                profile: photo,
+                updated: Date.now(),
+            });
+        }
+        return { type: "success" };
+    } catch (err) {
+        return formatAuth(err);
+    }
+};
+const __accounts_firebase_upload_profile_photo = async (file, type, user, progress, callback, fallback) => {
+    try {
+        const storageRef = ref(storage, `profile-photo/${user.uid}.${type}`);
+        const uploadTask = uploadBytesResumable(storageRef, file, {
+            contentType: file.type,
+        });
+        uploadTask.on("state_changed", (snapshot) => {
+            progress((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+        }, (err) => fallback(err), () => {
+            getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+                callback(downloadURL);
+            }, (err) => fallback(err));
+        });
+    } catch (err) {
+        fallback(err);
+    }
+}
 export {
-    db,
-    auth,
-    logout,
-    signInWithEmail,
-    signInWithGoogle,
-    registerWithEmail,
-    sendPasswordReset,
-    signInWithFacebook,
+    __accounts_firebase_auth,
+    __accounts_firebase_logout,
+    __accounts_firebase_profile_update,
+    __accounts_firebase_signin_with_email,
+    __accounts_firebase_signup_with_email,
+    __accounts_firebase_signin_with_google,
+    __accounts_firebase_send_password_reset,
+    __accounts_firebase_signin_with_facebook,
+    __accounts_firebase_upload_profile_photo,
+    __accounts_firebase_send_verification_email,
 };

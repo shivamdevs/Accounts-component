@@ -18,14 +18,10 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function Accounts({
     onUserChange = null
 }) {
-    const [user] = (0, _auth.useAuthState)(_firebase.auth);
-    (0, _react.useEffect)(() => {
-        if (user) onUserChange && onUserChange(user);
-    }, [onUserChange, user]);
     return /*#__PURE__*/(0, _jsxRuntime.jsx)("div", {
         className: _AccountsModule.default.fixbox,
         style: {
-            backgroundImage: `url(${(0, _appdata.getCoverArt)()})`
+            backgroundImage: `url(${(0, _appdata.__accounts_get_cover_art)()})`
         },
         children: /*#__PURE__*/(0, _jsxRuntime.jsxs)("div", {
             className: _AccountsModule.default.row,
@@ -45,6 +41,14 @@ function Accounts({
                         }), /*#__PURE__*/(0, _jsxRuntime.jsx)(_reactRouterDom.Route, {
                             path: "/recover",
                             element: /*#__PURE__*/(0, _jsxRuntime.jsx)(Recover, {})
+                        }), /*#__PURE__*/(0, _jsxRuntime.jsx)(_reactRouterDom.Route, {
+                            path: "/redirect",
+                            element: /*#__PURE__*/(0, _jsxRuntime.jsx)(Redirect, {
+                                onUserChange: onUserChange
+                            })
+                        }), /*#__PURE__*/(0, _jsxRuntime.jsx)(_reactRouterDom.Route, {
+                            path: "/profile",
+                            element: /*#__PURE__*/(0, _jsxRuntime.jsx)(Profile, {})
                         }), /*#__PURE__*/(0, _jsxRuntime.jsx)(_reactRouterDom.Route, {
                             path: "/provider",
                             element: /*#__PURE__*/(0, _jsxRuntime.jsx)(Provider, {})
@@ -91,19 +95,48 @@ function Accounts({
 }
 var _default = Accounts;
 exports.default = _default;
+function Redirect({
+    onUserChange = null
+}) {
+    const [user] = (0, _auth.useAuthState)(_firebase.__accounts_firebase_auth);
+    const navigate = (0, _reactRouterDom.useNavigate)();
+    (0, _react.useEffect)(() => {
+        if (user) {
+            if (onUserChange) {
+                onUserChange(user);
+            } else {
+                navigate("/", {
+                    replace: true
+                });
+            }
+        } else {
+            navigate("/accounts/provider", {
+                replace: true
+            });
+        }
+    }, [navigate, onUserChange, user]);
+}
+;
 function Signin() {
-    (0, _appdata.setTitle)("Sign in");
+    (0, _appdata.__accounts_set_title)("Sign in");
     const [disabled, setDisabled] = (0, _react.useState)(false);
     const [email, setEmail] = (0, _react.useState)("");
     const [emailError, setEmailError] = (0, _react.useState)("");
     const [pass, setPass] = (0, _react.useState)("");
     const [passError, setPassError] = (0, _react.useState)("");
+    const [user] = (0, _auth.useAuthState)(_firebase.__accounts_firebase_auth);
+    const navigate = (0, _reactRouterDom.useNavigate)();
+    (0, _react.useEffect)(() => {
+        if (user) navigate("/accounts/redirect", {
+            replace: true
+        });
+    }, [navigate, user]);
     const doSubmit = async e => {
         e.preventDefault();
         setDisabled(true);
         setEmailError("");
         setPassError("");
-        const data = await (0, _firebase.signInWithEmail)(email, pass);
+        const data = await (0, _firebase.__accounts_firebase_signin_with_email)(email, pass);
         if (data.type !== "success") {
             if (data.for === "email") {
                 setEmailError(data.message) && e.target[0].focus();
@@ -204,7 +237,7 @@ function Signin() {
     });
 }
 function Signup() {
-    (0, _appdata.setTitle)("Sign up");
+    (0, _appdata.__accounts_set_title)("Sign up");
     const [disabled, setDisabled] = (0, _react.useState)(false);
     const [name, setName] = (0, _react.useState)("");
     const [nameError, setNameError] = (0, _react.useState)("");
@@ -212,6 +245,19 @@ function Signup() {
     const [emailError, setEmailError] = (0, _react.useState)("");
     const [pass, setPass] = (0, _react.useState)("");
     const [passError, setPassError] = (0, _react.useState)("");
+    const [user] = (0, _auth.useAuthState)(_firebase.__accounts_firebase_auth);
+    const navigate = (0, _reactRouterDom.useNavigate)();
+    (0, _react.useEffect)(() => {
+        if (user) {
+            if (user.metadata.creationTime === user.metadata.lastSignInTime) {
+                navigate("/accounts/profile");
+            } else {
+                navigate("/accounts/redirect", {
+                    replace: true
+                });
+            }
+        }
+    }, [navigate, user]);
     const doSubmit = async e => {
         e.preventDefault();
         if (!name) return e.target[0].focus();
@@ -219,7 +265,7 @@ function Signup() {
         setNameError("");
         setEmailError("");
         setPassError("");
-        const data = await (0, _firebase.registerWithEmail)(name, email, pass);
+        const data = await (0, _firebase.__accounts_firebase_signup_with_email)(name, email, pass);
         if (data.type !== "success") {
             if (data.for === "name") {
                 setNameError(data.message) && e.target[0].focus();
@@ -339,7 +385,7 @@ function Signup() {
     });
 }
 function Recover() {
-    (0, _appdata.setTitle)("Recover");
+    (0, _appdata.__accounts_set_title)("Recover");
     const [disabled, setDisabled] = (0, _react.useState)(false);
     const doSubmit = e => {
         e.preventDefault();
@@ -403,14 +449,27 @@ function Recover() {
     });
 }
 function Provider() {
-    (0, _appdata.setTitle)("Provider");
+    (0, _appdata.__accounts_set_title)("Provider");
     const [googleAuth, setGoogleAuth] = (0, _react.useState)(false);
     const [facebookAuth, setFacebookAuth] = (0, _react.useState)(false);
     const [popError, setPopError] = (0, _react.useState)('');
+    const [user] = (0, _auth.useAuthState)(_firebase.__accounts_firebase_auth);
+    const navigate = (0, _reactRouterDom.useNavigate)();
+    (0, _react.useEffect)(() => {
+        if (user) {
+            if (user.metadata.creationTime === user.metadata.lastSignInTime) {
+                navigate("/accounts/profile");
+            } else {
+                navigate("/accounts/redirect", {
+                    replace: true
+                });
+            }
+        }
+    }, [navigate, user]);
     const doGoogle = async () => {
         setGoogleAuth(true);
         setPopError('');
-        const data = await (0, _firebase.signInWithGoogle)();
+        const data = await (0, _firebase.__accounts_firebase_signin_with_google)();
         if (data.type !== "success") {
             if (data.for === "popup") {
                 setPopError(data.message);
@@ -425,7 +484,7 @@ function Provider() {
     const doFacebook = async () => {
         setFacebookAuth(true);
         setPopError('');
-        const data = await (0, _firebase.signInWithFacebook)();
+        const data = await (0, _firebase.__accounts_firebase_signin_with_facebook)();
         if (data.type !== "success") {
             if (data.for === "popup") {
                 setPopError(data.message);
@@ -450,7 +509,7 @@ function Provider() {
                 onClick: doGoogle,
                 disabled: googleAuth,
                 children: [/*#__PURE__*/(0, _jsxRuntime.jsx)("img", {
-                    src: _appdata.AssetPath + "auth_google.svg",
+                    src: _appdata.__accounts_asset_path + "auth_google.svg",
                     alt: ""
                 }), /*#__PURE__*/(0, _jsxRuntime.jsx)(SpinnerButton, {
                     spin: googleAuth,
@@ -466,7 +525,7 @@ function Provider() {
                 onClick: doFacebook,
                 disabled: facebookAuth,
                 children: [/*#__PURE__*/(0, _jsxRuntime.jsx)("img", {
-                    src: _appdata.AssetPath + "auth_facebook.svg",
+                    src: _appdata.__accounts_asset_path + "auth_facebook.svg",
                     alt: ""
                 }), /*#__PURE__*/(0, _jsxRuntime.jsx)(SpinnerButton, {
                     spin: facebookAuth,
@@ -493,6 +552,152 @@ function Provider() {
                     children: "Email Address"
                 })]
             })
+        })]
+    });
+}
+function Profile() {
+    (0, _appdata.__accounts_set_title)("Profile");
+    const [disabled, setDisabled] = (0, _react.useState)(false);
+    const [name, setName] = (0, _react.useState)("");
+    const [nameError, setNameError] = (0, _react.useState)("");
+    const [photo, setPhoto] = (0, _react.useState)("");
+    const [photoErr, setPhotoErr] = (0, _react.useState)("");
+    const [progress, setProgress] = (0, _react.useState)(null);
+    const [user] = (0, _auth.useAuthState)(_firebase.__accounts_firebase_auth);
+    const navigate = (0, _reactRouterDom.useNavigate)();
+    const doSubmit = async e => {
+        e.preventDefault();
+        setDisabled(true);
+        setPhotoErr("");
+        setNameError("");
+        const data = await (0, _firebase.__accounts_firebase_profile_update)(user, name || user.displayName, photo || user.photoURL);
+        if (data.type !== "success") {
+            if (data.for === "name") {
+                setNameError(data.message) && e.target[2].focus();
+            } else if (data.for === "push") {
+                console.error(data.message);
+            } else {
+                console.log(data);
+            }
+            return setDisabled(false);
+        }
+        navigate("/accounts/redirect", {
+            replace: true
+        });
+    };
+    const setPhotoFile = async file => {
+        setPhotoErr("");
+        if (!["image/jfif", "image/pjpeg", "image/jpeg", "image/pjp", "image/jpg", "image/png"].includes(file.type)) return setPhotoErr("Invalid photo type");
+        setDisabled(true);
+        const type = (() => {
+            const splits = file.name.split(".");
+            return splits[splits.length - 1];
+        })();
+        (0, _firebase.__accounts_firebase_upload_profile_photo)(file, type, user, setProgress, url => {
+            setPhoto(url);
+            setDisabled(false);
+            setProgress(null);
+        }, err => setPhotoErr(String(err)));
+    };
+    return /*#__PURE__*/(0, _jsxRuntime.jsxs)("form", {
+        className: _AccountsModule.default.login,
+        onSubmit: doSubmit,
+        children: [/*#__PURE__*/(0, _jsxRuntime.jsx)("div", {
+            className: _AccountsModule.default.title,
+            children: /*#__PURE__*/(0, _jsxRuntime.jsx)("span", {
+                children: "Profile"
+            })
+        }), user && /*#__PURE__*/(0, _jsxRuntime.jsxs)(_jsxRuntime.Fragment, {
+            children: [/*#__PURE__*/(0, _jsxRuntime.jsxs)("div", {
+                className: `${_AccountsModule.default.group} ${_AccountsModule.default.groupPhoto}`,
+                children: [/*#__PURE__*/(0, _jsxRuntime.jsx)("img", {
+                    src: photo || user.photoURL,
+                    alt: ""
+                }), /*#__PURE__*/(0, _jsxRuntime.jsx)("input", {
+                    type: "hidden",
+                    name: "photo",
+                    disabled: disabled,
+                    id: "user-photo",
+                    defaultValue: user.photoURL,
+                    onChange: ({
+                        target
+                    }) => setPhoto(target.value)
+                }), progress !== null && /*#__PURE__*/(0, _jsxRuntime.jsxs)("div", {
+                    className: _AccountsModule.default.progress,
+                    children: [progress, "%"]
+                })]
+            }), /*#__PURE__*/(0, _jsxRuntime.jsxs)("div", {
+                className: _AccountsModule.default.groupFlow,
+                children: [/*#__PURE__*/(0, _jsxRuntime.jsx)("label", {
+                    className: _AccountsModule.default.link,
+                    htmlFor: "user-input",
+                    type: "submit",
+                    disabled: disabled,
+                    children: /*#__PURE__*/(0, _jsxRuntime.jsx)(SpinnerButton, {
+                        text: "Upload",
+                        spin: disabled,
+                        color: "#92d4ff"
+                    })
+                }), /*#__PURE__*/(0, _jsxRuntime.jsx)("input", {
+                    type: "file",
+                    disabled: disabled,
+                    style: {
+                        display: "none"
+                    },
+                    id: "user-input",
+                    accept: "image/jpeg, image/jpg, image/png",
+                    onChange: ({
+                        target
+                    }) => setPhotoFile(target.files[0])
+                }), /*#__PURE__*/(0, _jsxRuntime.jsx)("div", {
+                    className: _AccountsModule.default.link,
+                    type: "submit",
+                    onClick: () => !disabled && setPhoto(_appdata.__accounts_asset_path + "user-no-image.svg"),
+                    children: /*#__PURE__*/(0, _jsxRuntime.jsx)(SpinnerButton, {
+                        text: "Remove",
+                        spin: disabled,
+                        color: "#92d4ff"
+                    })
+                })]
+            }), /*#__PURE__*/(0, _jsxRuntime.jsx)("div", {
+                className: _AccountsModule.default.error,
+                children: photoErr
+            }), /*#__PURE__*/(0, _jsxRuntime.jsxs)("div", {
+                className: _AccountsModule.default.group,
+                children: [/*#__PURE__*/(0, _jsxRuntime.jsx)("label", {
+                    htmlFor: "user-name",
+                    className: _AccountsModule.default.label,
+                    children: "Full name"
+                }), /*#__PURE__*/(0, _jsxRuntime.jsx)("input", {
+                    type: "text",
+                    autoComplete: "name",
+                    autoFocus: true,
+                    disabled: disabled,
+                    name: "name",
+                    className: _AccountsModule.default.input,
+                    id: "user-name",
+                    required: true,
+                    defaultValue: user.displayName,
+                    onChange: ({
+                        target
+                    }) => setName(target.value.trim())
+                }), /*#__PURE__*/(0, _jsxRuntime.jsx)("div", {
+                    className: _AccountsModule.default.error,
+                    children: nameError
+                })]
+            }), /*#__PURE__*/(0, _jsxRuntime.jsx)("div", {
+                className: _AccountsModule.default.group,
+                children: /*#__PURE__*/(0, _jsxRuntime.jsx)("button", {
+                    className: `${_AccountsModule.default.button} ${_AccountsModule.default.action}`,
+                    type: "submit",
+                    disabled: disabled,
+                    children: /*#__PURE__*/(0, _jsxRuntime.jsx)(SpinnerButton, {
+                        spin: disabled,
+                        text: "Save and Continue",
+                        color: "#92d4ff"
+                    })
+                })
+            })]
         })]
     });
 }
