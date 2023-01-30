@@ -13,11 +13,8 @@ import {
 } from "firebase/auth";
 import {
     getFirestore,
-    query,
-    getDocs,
-    collection,
-    where,
-    addDoc,
+    getDoc,
+    setDoc,
     updateDoc,
     doc,
 } from "firebase/firestore";
@@ -42,7 +39,7 @@ const storage = getStorage();
 function formatAuth(err) {
     const result = { type: "error", for: "", message: "" };
     const error = String(err);
-    console.log(error);
+    console.error(error);
     if (error.includes('auth/popup-closed-by-user')) {
         return (result.for = "popup") && (result.message = "Popup was closed by user, try again") && result;
     } else if (error.includes('auth/email-already-in-use')) {
@@ -65,10 +62,9 @@ const __accounts_firebase_signin_with_google = async () => {
     try {
         const res = await signInWithPopup(__accounts_firebase_auth, googleProvider);
         const user = res.user;
-        const q = query(collection(db, "users"), where("uid", "==", user.uid));
-        const docs = await getDocs(q);
-        if (docs.docs.length === 0) {
-            await addDoc(collection(db, "users"), {
+        const docs = await getDoc(doc(db, "users", user.uid));
+        if (!docs.exists()) {
+            await setDoc(doc(db, "users", user.uid), {
                 uid: user.uid,
                 name: user.displayName,
                 authProvider: "google",
@@ -87,10 +83,9 @@ const __accounts_firebase_signin_with_facebook = async () => {
     try {
         const res = await signInWithPopup(__accounts_firebase_auth, facebookProvider);
         const user = res.user;
-        const q = query(collection(db, "users"), where("uid", "==", user.uid));
-        const docs = await getDocs(q);
-        if (docs.docs.length === 0) {
-            await addDoc(collection(db, "users"), {
+        const docs = await getDoc(doc(db, "users", user.uid));
+        if (!docs.exists()) {
+            await setDoc(doc(db, "users", user.uid), {
                 uid: user.uid,
                 name: user.displayName,
                 authProvider: "facebook",
@@ -117,7 +112,7 @@ const __accounts_firebase_signup_with_email = async (name, email, password) => {
         const res = await createUserWithEmailAndPassword(__accounts_firebase_auth, email, password);
         const user = res.user;
         await updateProfile(user, { displayName: name });
-        await addDoc(collection(db, "users"), {
+        await setDoc(doc(db, "users", user.uid), {
             uid: user.uid,
             name,
             authProvider: "local",
@@ -152,10 +147,9 @@ const __accounts_firebase_logout = () => {
 const __accounts_firebase_profile_update = async (user, name, photo) => {
     try {
         await updateProfile(user, { displayName: name, photoURL: photo });
-        const q = query(collection(db, "users"), where("uid", "==", user.uid));
-        const docs = await getDocs(q);
-        for (const data of docs.docs) {
-            await updateDoc(doc(db, "users", data.id), {
+        const docs = await getDoc(doc(db, "users", user.uid));
+        if (docs.exists()) {
+            await updateDoc(doc(db, "users", docs.id), {
                 name: name,
                 profile: photo,
                 updated: Date.now(),
@@ -185,10 +179,12 @@ const __accounts_firebase_upload_profile_photo = async (file, type, user, progre
 }
 const __accounts_firebase_check_update_status = async (user) => {
     try {
-        const q = query(collection(db, "users"), where("uid", "==", user.uid));
-        const docs = await getDocs(q);
-        for (const data of docs.docs) return { type: "success", message: data.data().updated };
-        return { type: "success", message: false };
+        const docs = await getDoc(doc(db, "users", user.uid));
+        if (docs.exists()) {
+            return { type: "success", message: docs.data().updated };
+        } else {
+            return { type: "success", message: false };
+        }
     } catch (err) {
         return formatAuth(err);
     }

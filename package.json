@@ -1,6 +1,6 @@
 {
   "name": "myoasis-accounts",
-  "version": "1.4.1",
+  "version": "1.4.7",
   "description": "Account component for myoasis.tech",
   "main": "index.js",
   "scripts": {
